@@ -1,0 +1,6 @@
+export const GLOBALTYPES = {
+    AUTH: "AUTH",
+    ALERT: "ALERT",
+    UPDATE_TOKEN: "UPDATE_TOKEN",
+    SOCKET: "SOCKET",
+}
