@@ -20,3 +20,12 @@ code {
 
 /* LOADING */
 @import url("./loading.css");
+
+/* HOME */
+@import url("./home.css");
+
+/* MESSAGE */
+@import url("./message.css");
+
+/* MODAL */
+@import url("./modal.css");

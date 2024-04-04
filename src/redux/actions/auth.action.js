@@ -27,12 +27,21 @@ export const login = (data) => async (dispatch) => {
 
         
     } catch (err) {
-        dispatch({ 
-            type: GLOBALTYPES.ALERT, 
-            payload: {
-                error: err.response.data.message
-            } 
-        })
+        if (!err.response) {
+            dispatch({ 
+                type: GLOBALTYPES.ALERT, 
+                payload: {
+                    error: 'Server lost connection.'
+                } 
+            })
+        } else {
+            dispatch({ 
+                type: GLOBALTYPES.ALERT, 
+                payload: {
+                    error: err.response.data.message
+                } 
+            })
+        }
     }
 }
 
@@ -57,12 +66,21 @@ export const refreshToken = () => async (dispatch) => {
             dispatch({ type: GLOBALTYPES.ALERT, payload: {} })
 
         } catch (err) {
-            dispatch({ 
-                type: GLOBALTYPES.ALERT, 
-                payload: {
-                    error: err.response.data.msg
-                } 
-            })
+            if (!err.response) {
+                dispatch({ 
+                    type: GLOBALTYPES.ALERT, 
+                    payload: {
+                        error: 'Server lost connection.'
+                    } 
+                })
+            } else {
+                dispatch({ 
+                    type: GLOBALTYPES.ALERT, 
+                    payload: {
+                        error: err.response.data.message
+                    } 
+                })
+            }
         }
     }
 }

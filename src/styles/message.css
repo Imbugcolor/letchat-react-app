@@ -1,0 +1,8 @@
+.chat-display {
+    height: 90vh;
+    overflow-y: scroll;
+}
+
+.images_message_container {
+    max-width: 300px;
+}

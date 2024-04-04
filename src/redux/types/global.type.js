@@ -3,4 +3,5 @@ export const GLOBALTYPES = {
     ALERT: "ALERT",
     UPDATE_TOKEN: "UPDATE_TOKEN",
     SOCKET: "SOCKET",
+    MODAL: 'MODAL',
 }

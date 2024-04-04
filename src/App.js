@@ -11,9 +11,12 @@ import { refreshToken } from './redux/actions/auth.action';
 import { GLOBALTYPES } from './redux/types/global.type';
 import { BASE_URL } from './utils/config';
 import io from 'socket.io-client'
+import { getConversations } from './redux/actions/message.action';
+import CreateConversation from './components/modals/CreateConversation';
 
 function App() {
   const auth = useSelector(state => state.auth)
+  const modal = useSelector(state => state.modal)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -23,6 +26,7 @@ function App() {
 
   useEffect(() => {
     if (auth.isLogged) {
+      dispatch(getConversations({auth}))
       // create new socket 
       const socket = io(BASE_URL, {
         extraHeaders: {
@@ -32,12 +36,13 @@ function App() {
       dispatch({type: GLOBALTYPES.SOCKET, payload: socket})
       return () => socket.close()
     }
-  },[auth.isLogged, auth.token, dispatch])
+  },[auth, dispatch])
 
   return (
     <Router>
       <Notify />
       <div className="App">
+      { modal && modal.addChat && <CreateConversation />}
         <Routes>
             <Route exact path='/' Component={auth.isLogged ? Home : Login}/>
             <Route exact path='/register' Component={Register} />
