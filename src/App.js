@@ -13,9 +13,13 @@ import { BASE_URL } from './utils/config';
 import io from 'socket.io-client'
 import { getConversations } from './redux/actions/message.action';
 import CreateConversation from './components/modals/CreateConversation';
+import SocketClient from './socket.client';
+import EditConversation from './components/modals/EditConversation';
+import UploadImage from './components/upload/image.upload';
 
 function App() {
   const auth = useSelector(state => state.auth)
+  const socket = useSelector(state => state.socket)
   const modal = useSelector(state => state.modal)
   const dispatch = useDispatch()
 
@@ -33,7 +37,9 @@ function App() {
           Authorization: `Bearer ${auth.token}` // WARN: this will be ignored in a browser
         }
       })
-      dispatch({type: GLOBALTYPES.SOCKET, payload: socket})
+
+      socket.on('connect', () => dispatch({type: GLOBALTYPES.SOCKET, payload: socket}));
+  
       return () => socket.close()
     }
   },[auth, dispatch])
@@ -43,6 +49,9 @@ function App() {
       <Notify />
       <div className="App">
       { modal && modal.addChat && <CreateConversation />}
+      { modal && modal.editChat && <EditConversation />}
+      { modal && modal.editThumbnail && <UploadImage />}
+      { auth.isLogged && socket && <SocketClient />}
         <Routes>
             <Route exact path='/' Component={auth.isLogged ? Home : Login}/>
             <Route exact path='/register' Component={Register} />

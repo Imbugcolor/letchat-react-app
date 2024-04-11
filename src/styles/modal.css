@@ -1,5 +1,5 @@
 /* create conversation modal */
-#create-conversation-modal {
+#chat-modal {
     background-color: rgba(0,0,0,0.3);
 }
 
@@ -26,4 +26,14 @@
     line-height: 16px;
     cursor: pointer;
     color: #c32323;
+}
+
+.search_icon {
+    height: 42px;
+    position: absolute;
+    top: 0;
+    right: 7px;
+    color: #aab0ba;
+    font-size: 20px;
+    cursor: pointer;
 }

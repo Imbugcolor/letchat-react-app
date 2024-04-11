@@ -8,7 +8,10 @@ export const checkTokenExp = async (token, dispatch) => {
 
     if(decode.exp >= Date.now() / 1000) return;
 
-    const res = await axios.get(`${BASE_URL}/auth/refreshtoken`)
+    const res = await axios.get(`${BASE_URL}/auth/refreshtoken`, {
+        headers: {"Content-Type": "application/json"},
+        withCredentials: true
+    })
 
     dispatch({ type: GLOBALTYPES.UPDATE_TOKEN, payload: res.data.access_token })
     

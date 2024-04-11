@@ -2,7 +2,7 @@ import React from "react";
 
 const Header = () => {
   return (
-    <div className="px-5 py-5 flex justify-between items-center bg-white border-b-2">
+    <div className="header_chat_container px-5 py-5 flex justify-between items-center bg-white border-b">
       <div className="font-semibold text-2xl">LetChat</div>
       <div className="w-1/2">
         <input

@@ -2,11 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
+  createMessage,
   getMessages,
   loadMoreMessages,
 } from "../../../redux/actions/message.action";
 import LoadIcon from "../../../images/loading.gif";
 import MessageScreen from "../MessageScreen";
+import { MdOutlinePermMedia } from "react-icons/md";
+import { GLOBALTYPES } from "../../../redux/types/global.type";
+import Loading5 from '../../../images/loading5.gif'
 
 const Message = () => {
   const auth = useSelector((state) => state.auth);
@@ -20,7 +24,13 @@ const Message = () => {
   const [load, setLoad] = useState(false);
   const [last, setLast] = useState(0);
   const [total, setTotal] = useState(0);
+  const [limit, setLimit] = useState(0);
   const [isLoadMore, setIsLoadMore] = useState(0);
+
+  const [text, setText] = useState("");
+  const [media, setMedia] = useState([]);
+
+  const [loadMessage, setLoadMessage] = useState(false);
 
   // If data loaded, get data in Redux Store
   useEffect(() => {
@@ -30,6 +40,7 @@ const Message = () => {
       setPage(newData.page);
       setLast(newData.last);
       setTotal(newData.total);
+      setLimit(newData.limit);
     }
   }, [message.data, id]);
 
@@ -38,6 +49,7 @@ const Message = () => {
 
   useEffect(() => {
     if (id) {
+      setIsLoadMore(1)
       // get messages data each conversation
       const getMessagesData = async () => {
         setLoad(true);
@@ -45,15 +57,33 @@ const Message = () => {
         if (id && message.data.every((item) => item.id !== id)) {
           await dispatch(getMessages({ auth, id }));
           setTimeout(() => {
-            refDisplay.current.scrollTo(0, refDisplay.current.scrollHeight);
+            refDisplay.current.scrollTo({
+              top: refDisplay.current.scrollHeight,
+              behavior: 'smooth'
+            });
           }, 50);
         }
         setLoad(false);
       };
-  
+
       getMessagesData();
     }
   }, [id, auth, dispatch, message.data]);
+
+  useEffect(() => {
+    setIsLoadMore(1)
+  },[id, isLoadMore])
+
+  useEffect(() => {
+    if (refDisplay && refDisplay.current) {
+      setTimeout(() => {
+        refDisplay?.current?.scrollTo({
+          top: refDisplay.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }, 50);
+    }
+  },[id])
 
   // Load more
   useEffect(() => {
@@ -66,20 +96,10 @@ const Message = () => {
         },
         { threshold: 0.1 }
       );
-  
+
       observer.observe(pageEnd.current);
     }
   }, [setIsLoadMore, id]);
-
-  // useEffect(() => {
-  //   if (isLoadMore > 1) {
-  //     if (last < total) {
-  //       dispatch(loadMoreMessages({ auth, id, page: page + 1 }));
-  //       setIsLoadMore(1);
-  //     }
-  //   }
-  //   // eslint-disable-next-line
-  // }, [isLoadMore]);
 
   const handleScroll = (event) => {
     const { scrollTop } = event.currentTarget;
@@ -87,13 +107,65 @@ const Message = () => {
     if (scrollTop === 0 && isLoadMore === 1 && last < total + 1) {
       setIsLoadMore((p) => p + 1);
       // User has scrolled to the top, load more messages
-      dispatch(loadMoreMessages({ auth, id, page: page + 1 }));
+      dispatch(loadMoreMessages({ auth, id, page: page + 1, limit }));
 
       setIsLoadMore(1);
     }
   };
 
-  if (!id) return <MessageScreen />
+  const handleChangeMedia = (e) => {
+    const files = [...e.target.files];
+
+    let err = "";
+    let newMedia = [];
+    const types = ["image/png", "image/jpeg"];
+
+    files.forEach((file) => {
+      if (!file) return (err = "File does not exist.");
+
+      if (file.size > 1024 * 1024 * 25) {
+        return (err = "The image/video largest is 25mb.");
+      }
+
+      if (!types.includes(file.type))
+        return (err = "The image/video is not support.");
+
+      return newMedia.push(file);
+    });
+
+    if (err) dispatch({ type: GLOBALTYPES.ALERT, payload: { error: err } });
+
+    setMedia([...media, ...newMedia]);
+
+    e.target.value = null;
+  };
+
+  const handleDeleteMedia = (index) => {
+    const newArr = [...media];
+    newArr.splice(index, 1);
+    setMedia(newArr);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!text.trim() && media.length === 0) return;
+    setText("");
+    setMedia([]);
+
+    setLoadMessage(true);
+    await dispatch(
+      createMessage({ auth, conversationId: id, text, photos: media })
+    );
+    setLoadMessage(false);
+
+    if (refDisplay.current) {
+      setTimeout(() => {
+        refDisplay.current.scrollTo(0, refDisplay.current.scrollHeight);
+      }, 50);
+    }
+  };
+
+  if (!id) return <MessageScreen />;
   return (
     <div className="w-full px-5 flex flex-col justify-between">
       {load ? (
@@ -101,26 +173,44 @@ const Message = () => {
           <img src={LoadIcon} alt="loading" />
         </div>
       ) : (
-        <div className="chat-display flex flex-col mt-5" onScroll={handleScroll} ref={refDisplay}>
+        <div
+          className="chat-display flex flex-col mt-5"
+          onScroll={handleScroll}
+          ref={refDisplay}
+        >
           <button style={{ opacity: 0 }} ref={pageEnd}>
             Load more
           </button>
+
           {data.map((msg) => {
             if (msg.senderId.id === auth.user.id) {
               return (
                 <div className="flex justify-end mb-4" key={msg.id}>
-                  {msg.attachments?.length > 0 && (
-                    <div className="images_message_container">
-                      {msg.attachments.map((att) => (
-                        <img src={att.url} alt="" key={att.id} />
-                      ))}
-                    </div>
-                  )}
-                  {msg.text && (
-                    <div className="mr-2 py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white">
-                      {msg.text}
-                    </div>
-                  )}
+                  <div className='flex flex-col text-right text-sm'> 
+                    <span style={{ color: '#65676b'}}>{msg.senderId.fullname}</span>
+                    {!msg.text && msg.attachments && msg.attachments.length > 0 && (
+                      <div className="images_message_container flex flex-col text-right">
+                        {msg.attachments.map((att) => (
+                          <img src={att.url} alt="" key={att.id} />
+                        ))}
+                      </div>
+                    )}
+
+                    {msg.text && msg.attachments && msg.attachments.length > 0 && (
+                      <div className="images_message_container flex flex-col text-right">
+                        <div className="py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white w-fit self-end text-left"> {msg.text}</div>
+                        {msg.attachments.map((att) => (
+                          <img src={att.url} alt="" key={att.id} />
+                        ))}
+                      </div>
+                    )}
+
+                    {msg.text && (!msg.attachments || msg.attachments.length < 1) && (
+                      <div className="py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white w-fit self-end text-left">
+                        {msg.text}
+                      </div>
+                    )}
+                  </div>
 
                   <img
                     src={msg.senderId.avatar}
@@ -137,32 +227,80 @@ const Message = () => {
                     className="object-cover h-8 w-8 rounded-full"
                     alt=""
                   />
-                  {msg.attachments?.length > 0 && (
-                    <div className="images_message_container">
-                      {msg.attachments.map((att) => (
-                        <img src={att.url} alt="" key={att.id} />
-                      ))}
-                    </div>
-                  )}
+                  <div className='flex flex-col text-left text-sm'> 
+                    <span style={{ color: '#65676b'}}>{msg.senderId.fullname}</span>
+                    {!msg.text && msg.attachments && msg.attachments.length > 0 && (
+                      <div className="images_message_container flex flex-col text-left">
+                        {msg.attachments.map((att) => (
+                          <img src={att.url} alt="" key={att.id} />
+                        ))}
+                      </div>
+                    )}
 
-                  {msg.text && (
-                    <div className="ml-2 py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white">
-                      {msg.text}
-                    </div>
-                  )}
+                    {msg.text && msg.attachments && msg.attachments.length > 0 && (
+                      <div className="images_message_container flex flex-col text-left">
+                        <div className="py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white w-fit self-start text-left"> {msg.text}</div>
+                        {msg.attachments.map((att) => (
+                          <img src={att.url} alt="" key={att.id} />
+                        ))}
+                      </div>
+                    )}
+
+                    {msg.text && (!msg.attachments || msg.attachments.length < 1) && (
+                      <div className="py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white w-fit self-start text-left">
+                        {msg.text}
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             }
           })}
+          {loadMessage && (
+            <div className="chat_row you_message">
+              <img src={LoadIcon} alt="loading" />
+            </div>
+          )}
         </div>
       )}
-      <div className="py-5">
+
+      <form className="chat_form py-5 relative" onSubmit={handleSubmit}>
+        <div
+          className="show_media flex flex-col mt-5"
+          style={{ display: media.length > 0 ? "grid" : "none" }}
+        >
+          {media.map((item, index) => (
+            <div key={index} id="file_media">
+              <img
+                src={URL.createObjectURL(item)}
+                alt="images"
+                className="img-thumbnail"
+              />
+              <span className='delete_photo' onClick={() => handleDeleteMedia(index)}>&times;</span>
+            </div>
+          ))}
+        </div>
         <input
           className="w-full bg-gray-300 py-5 px-3 rounded-xl"
           type="text"
           placeholder="type your message here..."
+          value={text}
+          onChange={(e) => setText(e.target.value)}
         />
-      </div>
+        <div className="file_upload">
+          <MdOutlinePermMedia
+            style={{ fontSize: "26px", marginRight: "10px" }}
+          />
+          <input
+            type="file"
+            name="file"
+            id="file"
+            multiple
+            accept="image/*"
+            onChange={handleChangeMedia}
+          />
+        </div>
+      </form>
     </div>
   );
 };
