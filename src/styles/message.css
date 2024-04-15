@@ -75,6 +75,13 @@
     cursor: pointer;
 }
 
+.user_seen_msg p {
+    font-style: italic;
+    color: #9f9f9f;
+    display: inline-block;
+    margin-right: 3px;
+}
+
 
 /* Right Side Message */
 .icon_option {

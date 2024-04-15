@@ -1,3 +1,4 @@
+import { sortByIdToFirst } from "../../utils/sortToFirst";
 import { MESSAGE_TYPES } from "../types/message.type";
 
 const initialState = {
@@ -26,7 +27,7 @@ const messageReducer = (state = initialState, action) => {
         ...state,
         conversations: state.conversations.map((cv) => {
           const newCv = cv.id === action.payload.id ?
-             { ...cv, lastMessage: action.payload.lastMessage } : cv;
+             { ...cv, lastMessage: action.payload.lastMessage, isRead: action.payload.isRead } : cv;
           return newCv;
         }),
       };
@@ -70,6 +71,7 @@ const messageReducer = (state = initialState, action) => {
     case MESSAGE_TYPES.CREATE_MESSAGE:
       return {
         ...state,
+        conversations: sortByIdToFirst(state.conversations, action.payload.id),
         data: state.data.map((dt) => {
           const cvId = parseInt(dt.id);
           const newData =
@@ -81,6 +83,15 @@ const messageReducer = (state = initialState, action) => {
                 }
               : dt;
           return newData;
+        }),
+      };
+    case MESSAGE_TYPES.READ_MESSAGE:
+      return {
+        ...state,
+        conversations: state.conversations.map((cv) => {
+          const newCv = cv.id === action.payload.id ?
+             { ...cv, isRead: true, lastMessage: action.payload.message } : cv;
+          return newCv;
         }),
       };
     default:

@@ -5,16 +5,17 @@ import {
   createMessage,
   getMessages,
   loadMoreMessages,
+  readMessage,
 } from "../../../redux/actions/message.action";
 import LoadIcon from "../../../images/loading.gif";
 import MessageScreen from "../MessageScreen";
 import { MdOutlinePermMedia } from "react-icons/md";
 import { GLOBALTYPES } from "../../../redux/types/global.type";
-import Loading5 from '../../../images/loading5.gif'
 
 const Message = () => {
   const auth = useSelector((state) => state.auth);
   const message = useSelector((state) => state.message);
+  const conversations = useSelector((state) => state.message).conversations;
   const dispatch = useDispatch();
 
   const { id } = useParams();
@@ -26,6 +27,7 @@ const Message = () => {
   const [total, setTotal] = useState(0);
   const [limit, setLimit] = useState(0);
   const [isLoadMore, setIsLoadMore] = useState(0);
+  const [lastMsg, setLastMsg] = useState();
 
   const [text, setText] = useState("");
   const [media, setMedia] = useState([]);
@@ -69,6 +71,25 @@ const Message = () => {
       getMessagesData();
     }
   }, [id, auth, dispatch, message.data]);
+
+  useEffect(() => {
+    if (id && conversations.find(cv => cv.id === Number(id))) {
+      if (conversations.find(cv => cv.id === Number(id)).lastMessage) {
+        setLastMsg(conversations.find(cv => cv.id === Number(id)).lastMessage)
+      }
+    }
+  },[id, conversations])
+
+  useEffect(() => {
+    if (id && conversations.find(cv => cv.id === Number(id)) && conversations.find(cv => cv.id === Number(id)).isRead === false) {
+      if (conversations.find(cv => cv.id === Number(id)).lastMessage) {
+        if (conversations.find(cv => cv.id === Number(id)).lastMessage.senderId.id !== auth.user.id) {
+          dispatch(readMessage({ auth, conversationId: Number(id) }))
+        }
+      }
+      return;
+    }
+  },[id, conversations, dispatch, auth])
 
   useEffect(() => {
     setIsLoadMore(1)
@@ -210,6 +231,23 @@ const Message = () => {
                         {msg.text}
                       </div>
                     )}
+
+                    {
+                      lastMsg?.id === msg.id && lastMsg?.usersRead.length > 0 && 
+                      <div className="user_seen_msg w-fit self-end text-left"> 
+                       {
+                          lastMsg?.usersRead.length === 1 &&
+                            <p>{lastMsg?.usersRead[0].readBy.fullname}</p>
+                        }
+                        {
+                           lastMsg?.usersRead.length > 1 && lastMsg?.usersRead.map((usr,index) => (
+                                <p key={usr.id}>{usr.readBy.fullname}{index + 1 < lastMsg?.usersRead.length && ', '}</p>
+                              )
+                          )
+                        }
+                        <p>seen.</p>
+                      </div>
+                    }
                   </div>
 
                   <img
@@ -251,6 +289,23 @@ const Message = () => {
                         {msg.text}
                       </div>
                     )}
+
+                    {
+                      lastMsg?.id === msg.id && lastMsg?.usersRead.length > 0 &&
+                      <div className="user_seen_msg w-fit self-start text-left"> 
+                        {
+                          lastMsg?.usersRead.length === 1 &&
+                            <p>{lastMsg?.usersRead[0].readBy.fullname}</p>
+                        }
+                        {
+                           lastMsg?.usersRead.length > 1 && lastMsg?.usersRead.map((usr,index) => (
+                                <p key={usr.id}>{usr.readBy.fullname}{index + 1 < lastMsg?.usersRead.length && ', '}</p>
+                              )
+                          )
+                        }
+                        <p>seen.</p>
+                      </div>
+                    }
                   </div>
                 </div>
               );

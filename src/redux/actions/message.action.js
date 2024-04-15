@@ -81,7 +81,7 @@ export const createMessage = ({ auth, conversationId, text = null, photos = [] }
 
         dispatch({
             type: MESSAGE_TYPES.UPDATE_LAST_MESSAGE,
-            payload: { id: Number(conversationId), lastMessage: message}
+            payload: { id: Number(conversationId), lastMessage: message, isRead: true }
         })
     } catch (err) {
         console.log(err);
@@ -115,6 +115,21 @@ export const updateThumbnailConversation = ({ auth, conversationId, image }) => 
         dispatch({
             type: MESSAGE_TYPES.UPDATE_THUMBNAIL_CONVERSATION, 
             payload: { id: conversationId, url: res.data } 
+        })
+
+    } catch (err) {
+        console.log(err);
+        dispatch({type: GLOBALTYPES.ALERT, payload: {error: err.response.data.message}})
+    }
+}
+
+export const readMessage = ({ auth, conversationId }) => async(dispatch) => {
+    try {
+        const res = await patchDataAPI(`messages/read/${conversationId}`, {} , auth.token, dispatch) 
+
+        dispatch({
+            type: MESSAGE_TYPES.READ_MESSAGE, 
+            payload: { id: conversationId, message: res.data } 
         })
 
     } catch (err) {

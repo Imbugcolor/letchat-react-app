@@ -15,7 +15,7 @@ const SocketClient = () => {
         dispatch({ type: MESSAGE_TYPES.CREATE_MESSAGE, payload: { id: message.conversation.id, message } });
         dispatch({
           type: MESSAGE_TYPES.UPDATE_LAST_MESSAGE,
-          payload: { id: message.conversation.id, lastMessage: message}
+          payload: { id: message.conversation.id, lastMessage: message, isRead: false }
       })
     });
 

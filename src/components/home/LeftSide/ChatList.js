@@ -60,7 +60,7 @@ const ChatList = () => {
             <div className="text-lg font-semibold">
               {cv.name ? cv.name : cv.createdBy.username + " Group"}
             </div>
-            <span className="text-gray-500">
+            <span className={`text-gray-500 ${cv.isRead === false && 'font-semibold'}`}>
               {
                 cv.lastMessage && cv.lastMessage.senderId && cv.lastMessage.senderId.id === auth.user.id ? 'You: ' : !cv.lastMessage ? '' : cv.lastMessage.senderId.fullname + ': '
               }
