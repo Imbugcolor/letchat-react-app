@@ -1,9 +1,13 @@
 import React from "react";
+import logo from "../../images/logo.png"
 
 const Header = () => {
   return (
     <div className="header_chat_container px-5 py-5 flex justify-between items-center bg-white border-b">
-      <div className="font-semibold text-2xl">LetChat</div>
+      <div className="logo_brand flex items-center font-semibold text-2xl">
+        <img src={logo} alt=""/>
+        <h4>LetChat</h4>
+      </div>
       <div className="w-1/2">
         <input
           type="text"

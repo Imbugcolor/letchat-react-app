@@ -1,4 +1,4 @@
-import { getDataAPI, patchDataAPI, patchFormDataAPI, postDataAPI, postFormDataAPI } from "../../utils/fetchData";
+import { deleteDataAPI, getDataAPI, patchDataAPI, patchFormDataAPI, postDataAPI, postFormDataAPI } from "../../utils/fetchData";
 import { GLOBALTYPES } from "../types/global.type";
 import { MESSAGE_TYPES } from "../types/message.type";
 
@@ -40,7 +40,7 @@ export const loadMoreMessages = ({ auth, id, page = 1, limit = 10 }) => async(di
     }
 }
 
-export const createConversation = ({auth, users}) => async(dispatch) => {
+export const createConversation = ({ auth, users, navigate }) => async(dispatch) => {
     try {
         const userIds = [];
 
@@ -52,6 +52,10 @@ export const createConversation = ({auth, users}) => async(dispatch) => {
             type: MESSAGE_TYPES.CREATE_CONVERSATION, 
             payload: conversation 
         })
+
+        dispatch({ type: GLOBALTYPES.MODAL, payload: null })
+
+        return navigate(`/message/${conversation.id}`)
     } catch (err) {
         console.log(err);
         dispatch({type: GLOBALTYPES.ALERT, payload: {error: err.response.data.message}})
@@ -77,6 +81,11 @@ export const createMessage = ({ auth, conversationId, text = null, photos = [] }
         dispatch({
             type: MESSAGE_TYPES.CREATE_MESSAGE, 
             payload: { id: Number(conversationId), message } 
+        })
+
+        dispatch({
+            type: MESSAGE_TYPES.UPDATE_SCROLL_TO_BOTTOM, 
+            payload: { id: Number(conversationId) } 
         })
 
         dispatch({
@@ -131,6 +140,26 @@ export const readMessage = ({ auth, conversationId }) => async(dispatch) => {
             type: MESSAGE_TYPES.READ_MESSAGE, 
             payload: { id: conversationId, message: res.data } 
         })
+
+        dispatch({
+            type: MESSAGE_TYPES.UPDATE_NUM_UNREADS, 
+            payload: { id: conversationId, unRead: false } 
+        })
+
+    } catch (err) {
+        console.log(err);
+        dispatch({type: GLOBALTYPES.ALERT, payload: {error: err.response.data.message}})
+    }
+}
+
+export const deleteMessage = ({ auth, conversationId, messageId }) => async(dispatch) => {
+    try {
+        dispatch({
+            type: MESSAGE_TYPES.DELETE_MESSAGE, 
+            payload: { conversationId , messageId } 
+        })
+        
+        await deleteDataAPI(`messages/${messageId}`, auth.token, dispatch) 
 
     } catch (err) {
         console.log(err);

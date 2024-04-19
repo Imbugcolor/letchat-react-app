@@ -6,11 +6,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { GLOBALTYPES } from "../../../redux/types/global.type";
 import { useParams } from "react-router-dom";
 import { MdOutlineInsertPhoto } from "react-icons/md";
+import { GoDotFill } from "react-icons/go";
 
 const DetailConversation = () => {
+  const auth = useSelector(state => state.auth)
   const message = useSelector(state => state.message)
+  const media = useSelector(state => state.media)
   const dispatch = useDispatch()
   const [conversation, setConversation] = useState()
+  const [loadMedia, setLoadMedia] = useState(false)
+  const [mediaData, setMediaData] = useState([])
 
   const { id } = useParams();
 
@@ -21,6 +26,18 @@ const DetailConversation = () => {
     }
   },[id, message.conversations])
 
+  useEffect(() => {
+    const mediaData = media.find(md => md.conversationId === Number(id))
+    if (!mediaData) { 
+      setLoadMedia(true) 
+    } else {
+      const mediaFiles = mediaData.data
+      setLoadMedia(false) 
+      setMediaData(mediaFiles)
+    }
+
+  },[media, id])
+
   if (!conversation) return <></>
   return (
     <div className="w-2/5 border-l px-5">
@@ -28,13 +45,14 @@ const DetailConversation = () => {
         <div className="font-semibold text-xl py-4">{conversation.name || conversation.createdBy.username} Group</div>
         <img
           src={conversation.thumbnail}
-          className="h-64"
+          className="h-64 w-64 m-auto"
           alt=""
         />
-        <div className="font-semibold py-4">Active</div>
+        <div className="py-4 flex items-center"><GoDotFill style={{ color: 'green' }}/> 2 online</div>
       </div>
       <div className="accordion font-medium">
         <AccordionItem
+          conversationId={conversation.id}
           title="About Conversation"
           content={
             <>
@@ -45,6 +63,7 @@ const DetailConversation = () => {
           }
         />
          <AccordionItem
+          conversationId={conversation.id}
           title="Members"
           content={
             <>
@@ -64,44 +83,49 @@ const DetailConversation = () => {
             </>
           }
         />
+        {
+          conversation.createdBy.id === auth.user.id &&
+          <AccordionItem
+            conversationId={conversation.id}
+            title="Customize Conversation"
+            content={
+              <>
+                <div className="option_collapse_expand flex items-center my-3.5 cursor-pointer" onClick={() => dispatch({ type: GLOBALTYPES.MODAL, payload: { editChat: conversation}})}>
+                  <MdOutlineDriveFileRenameOutline className="icon_option"/>
+                  <p>
+                    Change Name 
+                  </p>
+                </div>
+                <div className="option_collapse_expand flex items-center my-3.5 cursor-pointer" onClick={() => dispatch({ type: GLOBALTYPES.MODAL, payload: { editThumbnail: conversation}})}>
+                  <MdOutlineInsertPhoto className="icon_option"/>
+                  <p>
+                    Change Photo
+                  </p>
+                </div>
+                <div className="option_collapse_expand flex items-center my-3.5 cursor-pointer">
+                  <IoColorPaletteOutline className="icon_option"/>
+                  <p>
+                    Change Color
+                  </p>
+                </div>
+              </>
+            }
+          />
+        }
         <AccordionItem
-          title="Customize Conversation"
-          content={
-            <>
-              <div className="option_collapse_expand flex items-center my-3.5 cursor-pointer" onClick={() => dispatch({ type: GLOBALTYPES.MODAL, payload: { editChat: conversation}})}>
-                <MdOutlineDriveFileRenameOutline className="icon_option"/>
-                <p>
-                  Change Name 
-                </p>
-              </div>
-              <div className="option_collapse_expand flex items-center my-3.5 cursor-pointer" onClick={() => dispatch({ type: GLOBALTYPES.MODAL, payload: { editThumbnail: conversation}})}>
-                <MdOutlineInsertPhoto className="icon_option"/>
-                <p>
-                  Change Photo
-                </p>
-              </div>
-              <div className="option_collapse_expand flex items-center my-3.5 cursor-pointer">
-                <IoColorPaletteOutline className="icon_option"/>
-                <p>
-                  Change Color
-                </p>
-              </div>
-            </>
-          }
-        />
-        <AccordionItem
+          conversationId={conversation.id}
           title="Media files"
           content={
-            <>
-              <ul>
-                <li>
-                  <a href="https://flowbite.com/pro/">Flowbite Pro</a>
-                </li>
-                <li>
-                  <a href="https://tailwindui.com/">Tailwind UI</a>
-                </li>
-              </ul>
-            </>
+            loadMedia ? <div>loading</div> :
+            <div className="flex">
+              {
+                mediaData.length > 0 ? mediaData.map(md => (
+                  <div key={md.id} className="w-12">
+                    <img src={md.url} alt=""/>
+                  </div>
+                )) : 'No media files yet'
+              }
+            </div>
           }
         />
       </div>

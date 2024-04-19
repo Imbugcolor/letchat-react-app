@@ -13,7 +13,7 @@ export const checkTokenExp = async (token, dispatch) => {
         withCredentials: true
     })
 
-    dispatch({ type: GLOBALTYPES.UPDATE_TOKEN, payload: res.data.access_token })
+    dispatch({ type: GLOBALTYPES.UPDATE_TOKEN, payload: res.data.accessToken })
     
-    return res.data.access_token
+    return res.data.accessToken
 }

@@ -4,11 +4,13 @@ import alert from './alert.reducer'
 import socket from './socket.reducer'
 import message from './message.reducer'
 import modal from './modal.reducer'
+import media from './media.reducer'
 
 export default combineReducers({
     auth,
     alert,
     socket,
     message,
-    modal
+    modal,
+    media,
 })

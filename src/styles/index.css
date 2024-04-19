@@ -18,6 +18,10 @@ code {
     monospace;
 }
 
+.gray-text {
+  color: #9f9f9f;
+}
+
 /* LOADING */
 @import url("./loading.css");
 
@@ -29,3 +33,6 @@ code {
 
 /* MODAL */
 @import url("./modal.css");
+
+/* SKELETON LOADING */
+@import url("./skeleton.css");

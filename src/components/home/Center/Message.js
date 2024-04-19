@@ -9,8 +9,13 @@ import {
 } from "../../../redux/actions/message.action";
 import LoadIcon from "../../../images/loading.gif";
 import MessageScreen from "../MessageScreen";
-import { MdOutlinePermMedia } from "react-icons/md";
+import { GrAttachment } from "react-icons/gr";
+import { RiSendPlaneFill } from "react-icons/ri";
 import { GLOBALTYPES } from "../../../redux/types/global.type";
+import { getTimeFromDate } from "../../../utils/dateFormat";
+import MessageOptions from "../../dropdown/messageOptions";
+import { MESSAGE_TYPES } from "../../../redux/types/message.type";
+import CenterSkeletonLoading from "../../skeleton/center.skeleton";
 
 const Message = () => {
   const auth = useSelector((state) => state.auth);
@@ -81,14 +86,24 @@ const Message = () => {
   },[id, conversations])
 
   useEffect(() => {
-    if (id && conversations.find(cv => cv.id === Number(id)) && conversations.find(cv => cv.id === Number(id)).isRead === false) {
-      if (conversations.find(cv => cv.id === Number(id)).lastMessage) {
-        if (conversations.find(cv => cv.id === Number(id)).lastMessage.senderId.id !== auth.user.id) {
-          dispatch(readMessage({ auth, conversationId: Number(id) }))
+    const getReadMessage = async() => {
+      if (id && conversations.find(cv => cv.id === Number(id)) && conversations.find(cv => cv.id === Number(id)).isRead === false) {
+        if (conversations.find(cv => cv.id === Number(id)).lastMessage) {
+          if (conversations.find(cv => cv.id === Number(id)).lastMessage.senderId.id !== auth.user.id) {
+            await dispatch(readMessage({ auth, conversationId: Number(id) }))
+  
+            if (refDisplay.current) {
+              setTimeout(() => {
+                refDisplay.current.scrollTo(0, refDisplay.current.scrollHeight);
+              }, 50);
+            }
+          }
         }
+        return;
       }
-      return;
     }
+
+    getReadMessage()
   },[id, conversations, dispatch, auth])
 
   useEffect(() => {
@@ -174,26 +189,51 @@ const Message = () => {
     setMedia([]);
 
     setLoadMessage(true);
+
     await dispatch(
       createMessage({ auth, conversationId: id, text, photos: media })
     );
+  
     setLoadMessage(false);
-
-    if (refDisplay.current) {
-      setTimeout(() => {
-        refDisplay.current.scrollTo(0, refDisplay.current.scrollHeight);
-      }, 50);
-    }
   };
+
+  useEffect(() => {
+    if (loadMessage) {
+      if (refDisplay && refDisplay.current) {
+        setTimeout(() => {
+          refDisplay?.current?.scrollTo({
+            top: refDisplay.current.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 50);
+      }
+    }
+  },[loadMessage])
+
+  useEffect(() => {
+    if (message.scrollToBottom && message.scrollToBottom === Number(id)) {
+      if (refDisplay && refDisplay.current) {
+        setTimeout(() => {
+          refDisplay?.current?.scrollTo({
+            top: refDisplay.current.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 50);
+      }
+      dispatch({ type: MESSAGE_TYPES.UPDATE_SCROLL_TO_BOTTOM, payload: { id: null } })
+    }
+  },[message.scrollToBottom, id, dispatch])
 
   if (!id) return <MessageScreen />;
   return (
     <div className="w-full px-5 flex flex-col justify-between">
       {load ? (
-        <div className="loading_conversation">
-          <img src={LoadIcon} alt="loading" />
-        </div>
+        // <div className="loading_conversation">
+        //   <img src={LoadIcon} alt="loading" />
+        // </div>
+        <CenterSkeletonLoading />
       ) : (
+        <>
         <div
           className="chat-display flex flex-col mt-5"
           onScroll={handleScroll}
@@ -209,38 +249,49 @@ const Message = () => {
                 <div className="flex justify-end mb-4" key={msg.id}>
                   <div className='flex flex-col text-right text-sm'> 
                     <span style={{ color: '#65676b'}}>{msg.senderId.fullname}</span>
-                    {!msg.text && msg.attachments && msg.attachments.length > 0 && (
-                      <div className="images_message_container flex flex-col text-right">
-                        {msg.attachments.map((att) => (
-                          <img src={att.url} alt="" key={att.id} />
-                        ))}
-                      </div>
-                    )}
+                    <div className="message_context flex items-center justify-end">
+                      <MessageOptions message={msg} conversationId={Number(id)}/>
+                      {!msg.text && msg.attachments && msg.attachments.length > 0 && (
+                        <div className="max-w-lg inline-block images_message_container flex flex-col text-right">
+                          {msg.attachments.map((att) => (
+                            <img src={att.url} alt="" key={att.id} className="max-w-xs"/>
+                          ))}
+                        </div>
+                      )}
 
-                    {msg.text && msg.attachments && msg.attachments.length > 0 && (
-                      <div className="images_message_container flex flex-col text-right">
-                        <div className="py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white w-fit self-end text-left"> {msg.text}</div>
-                        {msg.attachments.map((att) => (
-                          <img src={att.url} alt="" key={att.id} />
-                        ))}
-                      </div>
-                    )}
+                      {msg.text && msg.attachments && msg.attachments.length > 0 && (
+                        <div className="max-w-lg inline-block images_message_container flex flex-col text-right">
+                          <div className="py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white w-fit self-end text-left"> {msg.text}</div>
+                          {msg.attachments.map((att) => (
+                            <img src={att.url} alt="" key={att.id} className="max-w-xs"/>
+                          ))}
+                        </div>
+                      )}
 
-                    {msg.text && (!msg.attachments || msg.attachments.length < 1) && (
-                      <div className="py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white w-fit self-end text-left">
-                        {msg.text}
+                      {msg.text && (!msg.attachments || msg.attachments.length < 1) && (
+                        <div className="max-w-lg inline-block py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white w-fit self-end text-left">
+                          {msg.text}
+                        </div>
+                      )}
+                    </div>
+
+                    {msg.createdAt && (
+                      <div className="message_time_send w-fit self-end text-left mt-1 gray-text">
+                        {
+                          getTimeFromDate(new Date(msg.createdAt))
+                        }
                       </div>
                     )}
 
                     {
-                      lastMsg?.id === msg.id && lastMsg?.usersRead.length > 0 && 
+                      lastMsg?.id === msg.id && lastMsg?.usersRead?.length > 0 && 
                       <div className="user_seen_msg w-fit self-end text-left"> 
                        {
-                          lastMsg?.usersRead.length === 1 &&
+                          lastMsg?.usersRead?.length === 1 &&
                             <p>{lastMsg?.usersRead[0].readBy.fullname}</p>
                         }
                         {
-                           lastMsg?.usersRead.length > 1 && lastMsg?.usersRead.map((usr,index) => (
+                           lastMsg?.usersRead?.length > 1 && lastMsg?.usersRead.map((usr,index) => (
                                 <p key={usr.id}>{usr.readBy.fullname}{index + 1 < lastMsg?.usersRead.length && ', '}</p>
                               )
                           )
@@ -268,37 +319,45 @@ const Message = () => {
                   <div className='flex flex-col text-left text-sm'> 
                     <span style={{ color: '#65676b'}}>{msg.senderId.fullname}</span>
                     {!msg.text && msg.attachments && msg.attachments.length > 0 && (
-                      <div className="images_message_container flex flex-col text-left">
+                      <div className="max-w-lg images_message_container flex flex-col text-left">
                         {msg.attachments.map((att) => (
-                          <img src={att.url} alt="" key={att.id} />
+                          <img src={att.url} alt="" key={att.id} className="max-w-xs"/>
                         ))}
                       </div>
                     )}
 
                     {msg.text && msg.attachments && msg.attachments.length > 0 && (
-                      <div className="images_message_container flex flex-col text-left">
+                      <div className="max-w-lg images_message_container flex flex-col text-left">
                         <div className="py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white w-fit self-start text-left"> {msg.text}</div>
                         {msg.attachments.map((att) => (
-                          <img src={att.url} alt="" key={att.id} />
+                          <img src={att.url} alt="" key={att.id} className="max-w-xs"/>
                         ))}
                       </div>
                     )}
 
                     {msg.text && (!msg.attachments || msg.attachments.length < 1) && (
-                      <div className="py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white w-fit self-start text-left">
+                      <div className="max-w-lg py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white w-fit self-start text-left">
                         {msg.text}
                       </div>
                     )}
 
+                    {msg.createdAt && (
+                      <div className="message_time_send w-fit self-start text-left mt-1 gray-text">
+                        {
+                          getTimeFromDate(new Date(msg.createdAt))
+                        }
+                      </div>
+                    )}
+
                     {
-                      lastMsg?.id === msg.id && lastMsg?.usersRead.length > 0 &&
+                      lastMsg?.id === msg.id && lastMsg?.usersRead?.length > 0 &&
                       <div className="user_seen_msg w-fit self-start text-left"> 
                         {
-                          lastMsg?.usersRead.length === 1 &&
+                          lastMsg?.usersRead?.length === 1 &&
                             <p>{lastMsg?.usersRead[0].readBy.fullname}</p>
                         }
                         {
-                           lastMsg?.usersRead.length > 1 && lastMsg?.usersRead.map((usr,index) => (
+                           lastMsg?.usersRead?.length > 1 && lastMsg?.usersRead.map((usr,index) => (
                                 <p key={usr.id}>{usr.readBy.fullname}{index + 1 < lastMsg?.usersRead.length && ', '}</p>
                               )
                           )
@@ -312,50 +371,55 @@ const Message = () => {
             }
           })}
           {loadMessage && (
-            <div className="chat_row you_message">
-              <img src={LoadIcon} alt="loading" />
+            <div className="chat_row you_message flex justify-end mr-8">
+              <img src={LoadIcon} alt="loading" className="w-2.5"/>
             </div>
           )}
         </div>
+
+        <form className="chat_form flex py-5 relative" onSubmit={handleSubmit}>
+          <div
+            className="show_media flex flex-col mt-5"
+            style={{ display: media.length > 0 ? "grid" : "none" }}
+          >
+            {media.map((item, index) => (
+              <div key={index} id="file_media">
+                <img
+                  src={URL.createObjectURL(item)}
+                  alt="images"
+                  className="img-thumbnail"
+                />
+                <span className='delete_photo' onClick={() => handleDeleteMedia(index)}>&times;</span>
+              </div>
+            ))}
+          </div>
+          <div className="w-full relative">
+            <input
+              className="w-full bg-gray-100 py-5 px-12 rounded-2xl"
+              type="text"
+              placeholder="Write messages..."
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+            <div className="file_upload cursor-pointer">
+              <GrAttachment
+                style={{ fontSize: "22px", marginRight: "10px" }}
+              />
+              <input
+                type="file"
+                name="file"
+                id="file"
+                multiple
+                accept="image/*"
+                onChange={handleChangeMedia}
+              />
+            </div>
+          </div>
+          <button type="submit" className="send_btn flex items-center justify-center rounded-2xl ml-1.5"><RiSendPlaneFill /></button>
+        </form>
+        </>
       )}
 
-      <form className="chat_form py-5 relative" onSubmit={handleSubmit}>
-        <div
-          className="show_media flex flex-col mt-5"
-          style={{ display: media.length > 0 ? "grid" : "none" }}
-        >
-          {media.map((item, index) => (
-            <div key={index} id="file_media">
-              <img
-                src={URL.createObjectURL(item)}
-                alt="images"
-                className="img-thumbnail"
-              />
-              <span className='delete_photo' onClick={() => handleDeleteMedia(index)}>&times;</span>
-            </div>
-          ))}
-        </div>
-        <input
-          className="w-full bg-gray-300 py-5 px-3 rounded-xl"
-          type="text"
-          placeholder="type your message here..."
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-        <div className="file_upload">
-          <MdOutlinePermMedia
-            style={{ fontSize: "26px", marginRight: "10px" }}
-          />
-          <input
-            type="file"
-            name="file"
-            id="file"
-            multiple
-            accept="image/*"
-            onChange={handleChangeMedia}
-          />
-        </div>
-      </form>
     </div>
   );
 };

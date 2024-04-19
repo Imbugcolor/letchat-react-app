@@ -9,6 +9,11 @@ const authReducer = (state = initialState, action) => {
                 ...action.payload,
                 isLogged: true
             };
+        case GLOBALTYPES.UPDATE_TOKEN:
+            return {
+                ...state,
+                token: action.payload
+            };
         default:
             return state;
     }

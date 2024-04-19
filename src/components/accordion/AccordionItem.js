@@ -1,11 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getMedia } from "../../redux/actions/media.action";
 
-const AccordionItem = ({ title, content }) => {
+const AccordionItem = ({ conversationId, title, content }) => {
+    const auth = useSelector(state => state.auth);
+    const media = useSelector(state => state.media);
     const [isOpen, setIsOpen] = useState(false);
+    const [firstOpen, setFirstOpen] = useState(false)
+    const dispatch = useDispatch()
   
     const toggleAccordion = () => {
       setIsOpen(!isOpen);
     };
+
+    useEffect(() => {
+      setIsOpen(false)
+      setFirstOpen(false)
+    },[conversationId])
+
+    useEffect(() => {
+      const getMediaData = async () => {
+        if (firstOpen) return;
+        if (title === 'Media files' && isOpen && !firstOpen) {
+          if (media.every(md => md.conversationId !== conversationId)) {
+            setFirstOpen(true)
+            await dispatch(getMedia({ auth, id: conversationId }))
+          }
+        } 
+      }
+      getMediaData()
+    },[title, isOpen, firstOpen, media, conversationId, auth, dispatch])
   
     return (
       <div className="accordion-item">

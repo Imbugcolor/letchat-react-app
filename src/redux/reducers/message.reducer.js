@@ -6,6 +6,7 @@ const initialState = {
   result: 0,
   data: [],
   firstLoad: false,
+  scrollToBottom: null,
 };
 
 const messageReducer = (state = initialState, action) => {
@@ -39,6 +40,11 @@ const messageReducer = (state = initialState, action) => {
               { ...cv, name: action.payload.name } : cv;
           return newCv;
         }),
+      };
+    case MESSAGE_TYPES.UPDATE_SCROLL_TO_BOTTOM:
+      return {
+        ...state,
+        scrollToBottom: action.payload.id
       };
     case MESSAGE_TYPES.UPDATE_THUMBNAIL_CONVERSATION:
       return {
@@ -84,6 +90,7 @@ const messageReducer = (state = initialState, action) => {
               : dt;
           return newData;
         }),
+        newMessage: action.payload.newMessage,
       };
     case MESSAGE_TYPES.READ_MESSAGE:
       return {
@@ -92,6 +99,25 @@ const messageReducer = (state = initialState, action) => {
           const newCv = cv.id === action.payload.id ?
              { ...cv, isRead: true, lastMessage: action.payload.message } : cv;
           return newCv;
+        }),
+      };
+    case MESSAGE_TYPES.UPDATE_NUM_UNREADS:
+      return {
+        ...state,
+        conversations: state.conversations.map((cv) => {
+          const newCv = cv.id === action.payload.id ?
+              { ...cv, numUnReads: action.payload.unRead ? cv.numUnReads + 1 : 0 } : cv;
+          return newCv;
+        }),
+      };
+    case MESSAGE_TYPES.DELETE_MESSAGE:
+      return {
+        ...state,
+        data: state.data.map((dt) => {
+          if (parseInt(dt.id) === action.payload.conversationId) {
+            return {...dt, data: dt.data.filter((message) => message.id !== action.payload.messageId)}
+          }
+          return dt;
         }),
       };
     default:

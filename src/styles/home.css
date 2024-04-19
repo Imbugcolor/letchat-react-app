@@ -6,7 +6,22 @@
     z-index: 10;
 }
 
+.logo_brand img {
+    width: 50px;
+}
+
 .main_chat__container {
     height: 863px;
     margin-top: 90px;
+}
+
+.create_conversation__home {
+    border: 1px solid #084b82;
+    width: fit-content;
+    margin: auto;
+    color: #054c84;
+}
+
+.create_conversation__home:hover {
+    background-color: #d4eeff;
 }
