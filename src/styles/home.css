@@ -25,3 +25,11 @@
 .create_conversation__home:hover {
     background-color: #d4eeff;
 }
+
+
+.user-dropdown-menu {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    border: 1px solid #e7e7e7;
+}

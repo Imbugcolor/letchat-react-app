@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MESSAGE_TYPES } from "./redux/types/message.type";
+import { GLOBALTYPES } from "./redux/types/global.type";
 
 const SocketClient = () => {
   const auth = useSelector((state) => state.auth);
@@ -70,6 +71,27 @@ const SocketClient = () => {
     });
 
     return () => socket.off("userCreateConversation");
+    
+  }, [socket, dispatch]);
+
+  // Users Status
+  useEffect(() => {
+
+    socket.on("userOnline", (id) => {
+        dispatch({ type: GLOBALTYPES.ONLINE, payload: id });
+    });
+
+    return () => socket.off("userOnline");
+    
+  }, [socket, dispatch]);
+
+  useEffect(() => {
+
+    socket.on("userOffline", (id) => {
+        dispatch({ type: GLOBALTYPES.OFFLINE, payload: id });
+    });
+
+    return () => socket.off("userOffline");
     
   }, [socket, dispatch]);
 

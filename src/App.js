@@ -16,6 +16,7 @@ import CreateConversation from './components/modals/CreateConversation';
 import SocketClient from './socket.client';
 import EditConversation from './components/modals/EditConversation';
 import UploadImage from './components/upload/image.upload';
+import { getUsersOnline } from './redux/actions/status.action';
 
 function App() {
   const auth = useSelector(state => state.auth)
@@ -38,7 +39,10 @@ function App() {
         }
       })
 
-      socket.on('connect', () => dispatch({type: GLOBALTYPES.SOCKET, payload: socket}));
+      socket.on('connect', () => {
+        dispatch({type: GLOBALTYPES.SOCKET, payload: socket})
+        dispatch(getUsersOnline({ auth }))
+      });
   
       return () => socket.close()
     }

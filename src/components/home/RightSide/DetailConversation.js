@@ -12,12 +12,26 @@ const DetailConversation = () => {
   const auth = useSelector(state => state.auth)
   const message = useSelector(state => state.message)
   const media = useSelector(state => state.media)
+  const status = useSelector(state => state.status)
   const dispatch = useDispatch()
   const [conversation, setConversation] = useState()
   const [loadMedia, setLoadMedia] = useState(false)
   const [mediaData, setMediaData] = useState([])
+  const [usersOnline, setUsersOnline] = useState([])
 
   const { id } = useParams();
+
+  useEffect(() => {
+    const online = [];
+    if (conversation && conversation.participants && conversation.participants.length > 0) {
+      conversation.participants.forEach(part => {
+          if (status.some(id => id === part.user.id)) {
+            return online.push(part.user)
+          }
+      })
+    }
+    setUsersOnline(online)
+  },[id, status, conversation])
 
   useEffect(() => {
     if(id && message.conversations.length > 0) {
@@ -48,7 +62,7 @@ const DetailConversation = () => {
           className="h-64 w-64 m-auto"
           alt=""
         />
-        <div className="py-4 flex items-center"><GoDotFill style={{ color: 'green' }}/> 2 online</div>
+        <div className="py-4 flex items-center"><GoDotFill style={{ color: 'green' }}/> {usersOnline.length} online</div>
       </div>
       <div className="accordion font-medium">
         <AccordionItem
@@ -70,12 +84,20 @@ const DetailConversation = () => {
             {
               conversation.participants.map(part => (
                 <div className="flex items-center my-3.5" key={part.id}>
-                  <div>
-                    <img className="w-10 rounded-full mr-3.5" src={part.user.avatar} alt=""/>
+                  <div className="mr-3.5">
+                    <img className="w-10 rounded-full" src={part.user.avatar} alt=""/>
                   </div>
-                  <div>
-                    <p>{part.user.fullname}</p>
-                    <p className="font-normal text-sm" style={{ color: '#9f9f9f' }}>{part.user.id === conversation.createdBy.id ? 'Group creator' : 'Member'}</p>
+                  <div className="flex items-center justify-between w-4/5">
+                    <div>
+                      <p>{part.user.fullname}</p>
+                      <p className="font-normal text-sm" style={{ color: '#9f9f9f' }}>{part.user.id === conversation.createdBy.id ? 'Group creator' : 'Member'}</p>
+                    </div>
+                    <div>
+                      {
+                        usersOnline.some(usr => usr.id === part.user.id) &&
+                        <GoDotFill style={{ color: 'green' }}/>
+                      }
+                    </div>
                   </div>
                 </div>
               ))

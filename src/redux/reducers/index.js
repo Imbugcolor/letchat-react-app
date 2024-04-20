@@ -5,6 +5,7 @@ import socket from './socket.reducer'
 import message from './message.reducer'
 import modal from './modal.reducer'
 import media from './media.reducer'
+import status from './status.reducer'
 
 export default combineReducers({
     auth,
@@ -13,4 +14,5 @@ export default combineReducers({
     message,
     modal,
     media,
+    status,
 })

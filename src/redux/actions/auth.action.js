@@ -84,3 +84,29 @@ export const refreshToken = () => async (dispatch) => {
         }
     }
 }
+
+export const signOut = ({ auth }) => async (dispatch) => {
+    try {
+        await getDataAPI('auth/logout', auth.token, dispatch)
+
+        localStorage.removeItem("firstLogin")
+
+        window.location.href = "/"
+    } catch (err) {
+        if (!err.response) {
+            dispatch({ 
+                type: GLOBALTYPES.ALERT, 
+                payload: {
+                    error: 'Server lost connection.'
+                } 
+            })
+        } else {
+            dispatch({ 
+                type: GLOBALTYPES.ALERT, 
+                payload: {
+                    error: err.response.data.message
+                } 
+            })
+        }
+    }
+}
