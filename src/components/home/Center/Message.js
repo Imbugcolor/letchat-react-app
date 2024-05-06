@@ -123,7 +123,7 @@ const Message = () => {
 
   // Load more
   useEffect(() => {
-    if (id) {
+    if (id && pageEnd.current) {
       const observer = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting) {
@@ -132,8 +132,13 @@ const Message = () => {
         },
         { threshold: 0.1 }
       );
-
+ 
       observer.observe(pageEnd.current);
+      
+       // Clean up the observer when component unmounts or id changes
+      return () => {
+        observer.disconnect();
+      };
     }
   }, [setIsLoadMore, id]);
 

@@ -14,6 +14,10 @@ const authReducer = (state = initialState, action) => {
                 ...state,
                 token: action.payload
             };
+        case GLOBALTYPES.VERIFY:
+            return {
+                ...action.payload,
+            };
         default:
             return state;
     }

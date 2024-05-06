@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { GLOBALTYPES } from "../../../redux/types/global.type";
@@ -6,11 +6,15 @@ import { MdOutlineInsertPhoto } from "react-icons/md";
 import { LuPlus } from "react-icons/lu";
 import moment from 'moment';
 import LeftsideSkeletonLoading from "../../skeleton/leftside.skeleton";
+import { getDataAPI } from "../../../utils/fetchData";
+import useDebounce from '../../../hooks/useDebounce';
 
 const ChatList = () => {
   const auth = useSelector((state) => state.auth);
   const message = useSelector((state) => state.message);
   const [conversationsData, setConversationsData] = useState([]);
+  const [isLoad, setIsLoad] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
 
   const dispatch = useDispatch();
 
@@ -28,9 +32,20 @@ const ChatList = () => {
 
   useEffect(() => {
     setConversationsData(message.conversations);
-  }, [message.conversations]);
+    setIsLoad(message.isLoaded);
+  }, [message.conversations, message.isLoaded]);
 
-  if (conversationsData.length < 1) return <LeftsideSkeletonLoading /> 
+  const handleChangeSearchInput = (e) => {
+    setSearchInput(e.target.value);
+  }
+
+  useDebounce(async() => {
+    const res = await getDataAPI(`conversations?name=${searchInput}`, auth.token, dispatch);
+    setConversationsData(res.data);
+  }, [dispatch, searchInput], 800
+  );
+
+  if (!isLoad) return <LeftsideSkeletonLoading /> 
   return (
     <div className="flex flex-col w-2/5 border-r overflow-y-auto">
       {/* <!-- search compt --> */}
@@ -39,6 +54,8 @@ const ChatList = () => {
           type="text"
           placeholder="Search"
           className="py-2 px-2 border border-gray-200 rounded-3xl w-full mr-3.5"
+          value={searchInput}
+          onChange={handleChangeSearchInput}
         />
         <button onClick={handleOpenAddChatModal} className='add_chat flex justify-center items-center'><LuPlus /></button>
       </div>

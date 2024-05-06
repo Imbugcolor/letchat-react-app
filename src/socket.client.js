@@ -74,6 +74,48 @@ const SocketClient = () => {
     
   }, [socket, dispatch]);
 
+
+  useEffect(() => {
+
+    socket.on("newUsersJoinConversation", (data) => {
+      if (auth && data.userIds.includes(auth.user.id)) {
+        dispatch({
+          type: MESSAGE_TYPES.CREATE_CONVERSATION, 
+          payload: data.conversation 
+        })
+      } else {
+        dispatch({ type: MESSAGE_TYPES.UPDATE_PARTICIPANTS, payload: { id: parseInt(data.conversation.id), participants: data.conversation.participants }})
+      }
+    });
+
+    return () => socket.off("newUsersJoinConversation");
+    
+  }, [socket, dispatch, auth]);
+
+  useEffect(() => {
+
+    socket.on("userLeaveConversation", (data) => {
+      dispatch({ type: MESSAGE_TYPES.REMOVE_USER_FROM_CONVERSATION, payload: { id: parseInt(data.conversation), userId: parseInt(data.user.id) }})
+    });
+
+    return () => socket.off("userLeaveConversation");
+    
+  }, [socket, dispatch]);
+
+  useEffect(() => {
+
+    socket.on("userRemovedConversation", (data) => {
+      if (auth && auth.user.id === parseInt(data.user.id)) {
+        dispatch({ type: MESSAGE_TYPES.USER_LEAVE_CONVERSATION, payload: { id: parseInt(data.conversation) }})
+      } else {
+        dispatch({ type: MESSAGE_TYPES.REMOVE_USER_FROM_CONVERSATION, payload: { id: parseInt(data.conversation), userId: parseInt(data.user.id) }})
+      }
+    });
+
+    return () => socket.off("userRemovedConversation");
+    
+  }, [socket, dispatch, auth]);
+
   // Users Status
   useEffect(() => {
 

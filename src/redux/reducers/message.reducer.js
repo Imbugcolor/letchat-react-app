@@ -5,8 +5,8 @@ const initialState = {
   conversations: [],
   result: 0,
   data: [],
-  firstLoad: false,
   scrollToBottom: null,
+  isLoaded: false,
 };
 
 const messageReducer = (state = initialState, action) => {
@@ -16,7 +16,7 @@ const messageReducer = (state = initialState, action) => {
         ...state,
         conversations: action.payload.conversations.reverse(),
         result: action.payload.result,
-        firstLoad: true,
+        isLoaded: true,
       };
     case MESSAGE_TYPES.CREATE_CONVERSATION:
       return {
@@ -120,6 +120,29 @@ const messageReducer = (state = initialState, action) => {
           return dt;
         }),
       };
+    case MESSAGE_TYPES.UPDATE_PARTICIPANTS:
+      return {
+        ...state,
+        conversations: state.conversations.map((cv) => {
+          const newCv = cv.id === action.payload.id ?
+             { ...cv, participants: action.payload.participants } : cv;
+          return newCv;
+        }),
+      }
+    case MESSAGE_TYPES.REMOVE_USER_FROM_CONVERSATION:
+      return {
+        ...state,
+        conversations: state.conversations.map((cv) => {
+          const newCv = cv.id === action.payload.id ?
+              { ...cv, participants: cv.participants.filter(part => part.user.id !== action.payload.userId) } : cv;
+          return newCv;
+        }),
+      }
+    case MESSAGE_TYPES.USER_LEAVE_CONVERSATION:
+        return {
+          ...state,
+          conversations: state.conversations.filter((cv) => cv.id !== action.payload.id),
+        }
     default:
       return state;
   }

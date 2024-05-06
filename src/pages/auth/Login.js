@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../redux/actions/auth.action";
-import logo from '../images/logo.png'
-
+import { login } from "../../redux/actions/auth.action";
+import logo from '../../images/logo.png'
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const initialState = { email: "", password: "" };
@@ -72,6 +72,9 @@ const Login = () => {
         >
           Login
         </button>
+        <p className="text-sm font-light text-gray-500 dark:text-gray-400">
+            You don't have an account? <Link to="/register" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Register here</Link>
+        </p>
       </form>
     </div>
   );

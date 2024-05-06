@@ -7,6 +7,8 @@ import { GLOBALTYPES } from "../../../redux/types/global.type";
 import { useParams } from "react-router-dom";
 import { MdOutlineInsertPhoto } from "react-icons/md";
 import { GoDotFill } from "react-icons/go";
+import { LuPlus } from "react-icons/lu";
+import MemberOptions from "../../dropdown/memberOptions";
 
 const DetailConversation = () => {
   const auth = useSelector(state => state.auth)
@@ -84,23 +86,35 @@ const DetailConversation = () => {
             {
               conversation.participants.map(part => (
                 <div className="flex items-center my-3.5" key={part.id}>
-                  <div className="mr-3.5">
+                  <div className="mr-3.5 relative">
                     <img className="w-10 rounded-full" src={part.user.avatar} alt=""/>
-                  </div>
-                  <div className="flex items-center justify-between w-4/5">
-                    <div>
-                      <p>{part.user.fullname}</p>
-                      <p className="font-normal text-sm" style={{ color: '#9f9f9f' }}>{part.user.id === conversation.createdBy.id ? 'Group creator' : 'Member'}</p>
-                    </div>
-                    <div>
+                    <div className="absolute -bottom-1 right-0 bg-white rounded-full">
                       {
                         usersOnline.some(usr => usr.id === part.user.id) &&
                         <GoDotFill style={{ color: 'green' }}/>
                       }
                     </div>
                   </div>
+                  <div className="flex items-center justify-between w-4/5">
+                    <div>
+                      <p>{part.user.fullname}</p>
+                      <p className="font-normal text-sm" style={{ color: '#9f9f9f' }}>{part.user.id === conversation.createdBy.id ? 'Group creator' : 'Member'}</p>
+                    </div>
+                    {
+                      part.user.id !== auth.user.id &&
+                      <div className="">
+                        <MemberOptions user={part.user} conversation={conversation} />
+                      </div>
+                    }
+                  </div>
                 </div>
               ))
+            }
+            {
+              conversation.createdBy.id === auth.user.id && 
+              <div className="add-member-button my-4 flex items-center cursor-pointer" onClick={() => dispatch({ type: GLOBALTYPES.MODAL, payload: { addMember: conversation }})}>
+                <LuPlus className="w-10 h-10 mr-3.5 rounded-full p-2"/> Add Member
+              </div>
             }
             </>
           }

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "../../redux/actions/auth.action";
+import { Link } from "react-router-dom";
 
 const UserMenu = () => {
   const auth = useSelector(state => state.auth);
@@ -24,11 +25,11 @@ const UserMenu = () => {
           id='dropdown_menu_options'
           onMouseLeave={() => setMenuOpen(false)}
         >
-          <span
+          <Link to={`/profile/${auth.user.id}`}
             className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700"
           >
             Your profile
-          </span>
+          </Link>
           <span
             className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700"
             onClick={() => dispatch(signOut({ auth }))}

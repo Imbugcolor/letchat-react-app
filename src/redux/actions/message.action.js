@@ -12,7 +12,7 @@ export const getConversations = ({auth, page = 1}) => async(dispatch) => {
 
         dispatch({
             type: MESSAGE_TYPES.GET_CONVERSATIONS, 
-            payload: { conversations, result: 0 }
+            payload: { conversations, result: conversations.length }
         })
     } catch (err) {
         dispatch({type: GLOBALTYPES.ALERT, payload: {error: err.response.data.message}})
@@ -164,5 +164,29 @@ export const deleteMessage = ({ auth, conversationId, messageId }) => async(disp
     } catch (err) {
         console.log(err);
         dispatch({type: GLOBALTYPES.ALERT, payload: {error: err.response.data.message}})
+    }
+}
+
+
+export const addMember = ({ auth, users, conversationId }) => async(dispatch) => {
+    try {
+        const userIds = users.map(user => user.id);
+        const res = await postDataAPI(`conversations/invite/${conversationId}`, { userIds }, auth.token, dispatch);
+
+        dispatch({ type: MESSAGE_TYPES.UPDATE_PARTICIPANTS, payload: { id: conversationId, participants: res.data.participants }})
+    } catch (error) {
+        console.log(error);
+        dispatch({type: GLOBALTYPES.ALERT, payload: {error: error.response.data.message}})
+    }
+}
+
+export const removeUserFromConversation = ({ auth, conversationId, userId }) => async(dispatch) => {
+    try {
+        await deleteDataAPI(`conversations/${conversationId}/user/${userId}`, auth.token, dispatch);
+
+        dispatch({ type: MESSAGE_TYPES.REMOVE_USER_FROM_CONVERSATION, payload: { id: conversationId, userId }})
+    } catch (error) {
+        console.log(error);
+        dispatch({type: GLOBALTYPES.ALERT, payload: {error: error.response.data.message}})
     }
 }

@@ -1,6 +1,4 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from './pages/Login';
-import Register from './pages/Register';
 import PrivateRouter from './customRouter/PrivateRouter';
 import PageRender from './customRouter/PageRender';
 import Notify from './components/notifies/Notify';
@@ -17,6 +15,10 @@ import SocketClient from './socket.client';
 import EditConversation from './components/modals/EditConversation';
 import UploadImage from './components/upload/image.upload';
 import { getUsersOnline } from './redux/actions/status.action';
+import Register from './pages/auth/register';
+import Verify from './pages/auth/verify';
+import Login from './pages/auth/Login';
+import AddMember from './components/modals/AddMember';
 
 function App() {
   const auth = useSelector(state => state.auth)
@@ -55,10 +57,12 @@ function App() {
       { modal && modal.addChat && <CreateConversation />}
       { modal && modal.editChat && <EditConversation />}
       { modal && modal.editThumbnail && <UploadImage />}
+      { modal && modal.addMember && <AddMember />}
       { auth.isLogged && socket && <SocketClient />}
         <Routes>
             <Route exact path='/' Component={auth.isLogged ? Home : Login}/>
             <Route exact path='/register' Component={Register} />
+            <Route exact path='/auth/verify' Component={Verify} />
             <Route exact path='/:page' element={<PrivateRouter component={PageRender}/>}/>
             <Route exact path='/:page/:id' element={<PrivateRouter component={PageRender}/>}/>
         </Routes>

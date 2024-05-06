@@ -36,3 +36,6 @@ code {
 
 /* SKELETON LOADING */
 @import url("./skeleton.css");
+
+/* PROFILE */
+@import url("./profile.css");
