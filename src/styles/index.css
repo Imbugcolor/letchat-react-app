@@ -22,6 +22,10 @@ code {
   color: #9f9f9f;
 }
 
+input {
+  outline: none;
+}
+
 /* LOADING */
 @import url("./loading.css");
 
@@ -39,3 +43,6 @@ code {
 
 /* PROFILE */
 @import url("./profile.css");
+
+/* UPLOAD */
+@import url("./upload.css");

@@ -6,6 +6,7 @@ import message from './message.reducer'
 import modal from './modal.reducer'
 import media from './media.reducer'
 import status from './status.reducer'
+import profile from './profile.reducer'
 
 export default combineReducers({
     auth,
@@ -15,4 +16,5 @@ export default combineReducers({
     modal,
     media,
     status,
+    profile
 })
