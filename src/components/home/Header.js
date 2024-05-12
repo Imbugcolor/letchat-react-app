@@ -1,23 +1,20 @@
 import React from "react";
 import logo from "../../images/logo.png"
 import UserMenu from "../dropdown/UserMenu";
+import SearchBar from "./SearchBar";
+import { Link } from "react-router-dom";
 
 const Header = () => {
+
   return (
     <div className="header_chat_container px-5 py-5 flex justify-between items-center bg-white border-b">
-      <div className="logo_brand flex items-center font-semibold text-2xl">
-        <img src={logo} alt=""/>
-        <h4>LetChat</h4>
+      <div className="logo_brand cursor-pointer">
+        <Link to='/' className="flex font-semibold text-2xl items-center">
+          <img src={logo} alt=""/>
+          <h4>LetChat</h4>
+        </Link>
       </div>
-      <div className="w-1/2">
-        <input
-          type="text"
-          name=""
-          id=""
-          placeholder="search IRL"
-          className="rounded-2xl bg-gray-100 py-3 px-5 w-full"
-        />
-      </div>
+      <SearchBar />
       <UserMenu />
     </div>
   );

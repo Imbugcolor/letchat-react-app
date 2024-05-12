@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GLOBALTYPES } from "../../redux/types/global.type";
-import { updateThumbnailConversation } from "../../redux/actions/message.action";
+import { updatePhotoProfile } from "../../redux/actions/profile.action";
 
-const UploadImage = () => {
+const UploadProfile = () => {
   const auth = useSelector(state => state.auth);
-  const conversation = useSelector(state => state.modal).editThumbnail
   const [image, setImage] = useState();
   const [load, setLoad] = useState(false);
 
@@ -39,7 +38,7 @@ const UploadImage = () => {
 
   const handleUpload = async() => {
     setLoad(true)
-    await dispatch(updateThumbnailConversation({ auth, conversationId: conversation.id, image }))
+    await dispatch(updatePhotoProfile({ auth, image }))
     setLoad(false)
 
     dispatch({ type: GLOBALTYPES.MODAL, payload: null })
@@ -138,4 +137,4 @@ const UploadImage = () => {
   );
 };
 
-export default UploadImage;
+export default UploadProfile;

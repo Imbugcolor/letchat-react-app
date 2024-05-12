@@ -1,5 +1,4 @@
 import { GLOBALTYPES } from "../types/global.type";
-
 const initialState = {}
 
 const authReducer = (state = initialState, action) => {
@@ -18,6 +17,16 @@ const authReducer = (state = initialState, action) => {
             return {
                 ...action.payload,
             };
+        case GLOBALTYPES.UPDATE_PROFILE:
+            return {
+                ...state,
+                user: { ...state.user, ...action.payload.data },
+            };
+        case GLOBALTYPES.UPDATE_PHOTO_PROFILE:
+            return {
+            ...state,
+            user: { ...state.user, avatar: action.payload.url },
+        };
         default:
             return state;
     }

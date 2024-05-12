@@ -19,6 +19,9 @@ import Register from './pages/auth/register';
 import Verify from './pages/auth/verify';
 import Login from './pages/auth/Login';
 import AddMember from './components/modals/AddMember';
+import EditProfile from './components/profile/Edit';
+import Header from './components/home/Header';
+import UploadProfile from './components/upload/profile.upload';
 
 function App() {
   const auth = useSelector(state => state.auth)
@@ -57,14 +60,17 @@ function App() {
       { modal && modal.addChat && <CreateConversation />}
       { modal && modal.editChat && <EditConversation />}
       { modal && modal.editThumbnail && <UploadImage />}
+      { modal && modal.uploadProfile && <UploadProfile />}
       { modal && modal.addMember && <AddMember />}
       { auth.isLogged && socket && <SocketClient />}
+      { auth.isLogged && <Header /> }
         <Routes>
             <Route exact path='/' Component={auth.isLogged ? Home : Login}/>
             <Route exact path='/register' Component={Register} />
             <Route exact path='/auth/verify' Component={Verify} />
             <Route exact path='/:page' element={<PrivateRouter component={PageRender}/>}/>
             <Route exact path='/:page/:id' element={<PrivateRouter component={PageRender}/>}/>
+            <Route exact path='/infor/edit' Component={EditProfile}/>
         </Routes>
       </div>
     </Router>

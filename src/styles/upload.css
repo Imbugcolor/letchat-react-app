@@ -1,0 +1,11 @@
+.delete_photo_upload {
+    position: absolute;
+    bottom: 0;
+    background-color: #1d4ed8;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 5px;
+}

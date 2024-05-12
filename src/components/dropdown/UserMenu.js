@@ -15,8 +15,8 @@ const UserMenu = () => {
 
 
   return (
-    <div className="user-menu h-12 w-12 rounded-full text-white font-semibold flex items-center justify-center hs-dropdown relative" onClick={toggleMenu}>
-        <img src={auth.user.avatar} alt='' className="rounded-full object-cover"/>
+    <div className="user-menu h-12 w-12 rounded-full text-white font-semibold flex items-center justify-center hs-dropdown relative cursor-pointer" onClick={toggleMenu}>
+        <img src={auth.user.avatar} alt='' className="rounded-full object-cover" style={{ width: '100px', height: '100%'}}/>
       {
         menuOpen &&
         <div

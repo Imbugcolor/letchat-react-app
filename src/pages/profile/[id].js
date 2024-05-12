@@ -1,160 +1,60 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { Link, useParams } from 'react-router-dom'
-import { GrSubtract } from 'react-icons/gr'
-import { FaEdit } from 'react-icons/fa'
-import Header from '../../components/home/Header'
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import Header from "../../components/home/Header";
+import { getUserProfile } from "../../redux/actions/profile.action";
+import Infor from "../../components/profile/Infor";
 
 const Profile = () => {
-    const auth = useSelector(state => state.auth)
-    const { id } = useParams()
-    const [loading, setLoading] = useState(false)
+  const auth = useSelector((state) => state.auth);
+  const profile = useSelector((state) => state.profile);
+  const { id } = useParams();
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
-    const [avt, setAvt] = useState('')
-    const [username, setUserName] = useState('')
-    const [address, setAddress] = useState('')
-    const [gender, setGender] = useState('')
-    const [dob, setDob] = useState('')
-
-    const inputRef = useRef()
-    const addressRef = useRef()
-
-    const [avtChange, setAvtChange] = useState(false)
-
-    const changeAvatar = (e) => {
-        const file = e.target.files[0]
-        setAvtChange(true)
-        setAvt(file)
+  useEffect(() => {
+    const getProfile = async () => {
+      if (profile.ids.every((item) => item !== parseInt(id))) {
+        setLoading(true);
+        await dispatch(getUserProfile({ id: parseInt(id), auth }));
+        setLoading(false);
+      }
+    };
+    if (parseInt(id) !== auth.user.id) {
+      getProfile();
     }
-
-    const handleSubmit = (e) => {
-        e.preventDefault()
-    }
-
-    const handleChangeAddress = (e) => {
-
-    }
-
-    useEffect(() => {
-        if(parseInt(id) === auth.user.id) {
-            setAvt(auth.user.avatar)
-            setUserName(auth.user.username)
-            setGender(auth.user.gender)
-        }
-    },[id, auth])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, auth, dispatch]);
 
   return (
     <div className="user-profile-container mt-24">
-        <Header />
-            <div className="">
-                <div className="user-header">
-                    <h2 className="header-title">Profile</h2>
-                    <p className="header-description">Account information</p>
-                </div>
-            </div>
-            <div className="profile-container flex">
-                <div className="col l-3 m-3 c-12 profile-user-avt">
-                    <div>
-                        <img
-                            src={avtChange ? URL.createObjectURL(avt) : avt}
-                            alt="" />
-                        <input type="file" size="60" onChange={changeAvatar} ref={inputRef} />
-                        <button className='select-img' onClick={() => inputRef.current.click()}>Change</button>
-                        <span>Maximum file size: 1 MB <br /> Format: .JPEG, .PNG</span>
-                    </div>
-                    <div className='user__sidebar_menu'>
-                        <h3><GrSubtract/>Account</h3>
-                        <ul>
-                            <li><Link to={`/profile/${auth.user.id}`} className='sidebar__option-menu active'>Account Information</Link></li>
-                            <li><Link to={'/security/password'} className='sidebar__option-menu'>Account security</Link></li>
-                        </ul>
-                    </div>
-                </div>
-               
-                <div className="col l-6 m-6 c-12 user-infor-wrapper">
-                    <div className='heading__form__user__infor'>
-                        <h4>Your information</h4>
-                    </div>
-                    <form onSubmit={handleSubmit}>
-                        <div className="user-infor-field">
-                            <label>ID</label>
-                            <input type="text" id="user-id" value={auth.user.id} disabled/>
-                        </div>
-
-                        <div className="user-infor-field">
-                            <label>Username</label>
-                            <input type="text" id="user-name"
-                                value={username} onChange={e => setUserName(e.target.value)} />
-                        </div>
-
-                        <div className="user-infor-field">
-                            <label>Email</label>
-                            <input type="text" id="user-email" value={auth.user.email || ''} disabled/>
-                        </div>
-
-                        <div className="user-infor-field">
-                            <label>Phone</label>
-                            <div className='user__field__group'>
-                                <a href='#!' className='region-number'>
-                                    +84
-                                </a>
-                                <input type="text" id="user-phone" value={auth.user.phone || ''} disabled/>
-                            </div>
-                          
-                        </div>
-
-                        <div className="user-infor-field">
-                            <label>Address</label>
-                            <div className="user__field__group">
-                                <input type="text" id="user-address" value='' disabled/> 
-                                
-                                <a href="#!" className="edit-field-icon"
-                                    onClick={handleChangeAddress}>
-                                    <FaEdit style={{ color: '#9e9e9e', cursor: 'pointer' }} />
-                                </a>
-                                <div className="address-form" ref={addressRef}>
-                                    
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="user-infor-field">
-                            <label>Gender</label>
-                            <div id="user-gender">
-                                <div className="user-gender-item">
-                                    <input type="radio" name="gender" value="male" id="male" checked={gender === "male" ? true : false}
-                                        onChange={(e) => setGender(e.target.value)} />
-                                    <label htmlFor="male">Nam</label>
-                                </div>
-                                <div className="user-gender-item">
-                                    <input type="radio" name="gender" value="female" id="female" checked={gender === "female" ? true : false}
-                                        onChange={(e) => setGender(e.target.value)} />
-                                    <label htmlFor="female">Nữ</label>
-                                </div>
-                                <div className="user-gender-item">
-                                    <input type="radio" name="gender" value="other" id="other" checked={gender === "other" ? true : false}
-                                        onChange={(e) => setGender(e.target.value)} />
-                                    <label htmlFor="other">Khác</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="user-infor-field">
-                            <label htmlFor="">Ngày sinh</label>
-                            <input type="date" value={dob} onChange={e => setDob(e.target.value)} />
-                        </div>
-                        <div className="user-infor-field">
-                            <label>Date created</label>
-                            <div id="user-created-time">{new Date(auth.user.createdAt).toLocaleDateString()}</div>
-                        </div>
-
-                        <button type="submit" className="save-btn">Save</button>
-                    </form>
-                </div>
-                
-            </div> 
+      {loading ? (
+        <div className="flex items-center justify-center" style={{ height: '80vh' }}>
+          <svg
+            aria-hidden="true"
+            role="status"
+            className="inline w-4 h-4 me-3 text-white animate-spin"
+            viewBox="0 0 100 101"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ color: '#000' }}
+          >
+            <path
+              d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+              fill="#E5E7EB"
+            />
+            <path
+              d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+              fill="currentColor"
+            />
+          </svg>
+          Loading...
         </div>
-    )
-}
+      ) : (
+        <Infor auth={auth} profile={profile} id={id} />
+      )}
+    </div>
+  );
+};
 
-export default Profile
+export default Profile;
