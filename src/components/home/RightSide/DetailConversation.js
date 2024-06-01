@@ -59,12 +59,12 @@ const DetailConversation = () => {
 
   if (!conversation) return <></>;
   return (
-    <div className="w-2/5 border-l px-5">
+    <div className="w-2/5 border-l px-5 overflow-y-auto">
       <div className="flex flex-col">
         <div className="font-semibold text-xl py-4">
           {conversation.name || conversation.createdBy.username} Group
         </div>
-        <img src={conversation.thumbnail} className="h-64 w-64 m-auto" alt="" />
+        <img src={conversation.thumbnail} className="w-40 m-auto" alt="" />
         <div className="py-4 flex items-center">
           <GoDotFill style={{ color: "green" }} /> {usersOnline.length} online
         </div>

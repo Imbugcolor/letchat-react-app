@@ -6,6 +6,7 @@ import {
   getMessages,
   loadMoreMessages,
   readMessage,
+  updateMessage,
 } from "../../../redux/actions/message.action";
 import LoadIcon from "../../../images/loading.gif";
 import MessageScreen from "../MessageScreen";
@@ -16,6 +17,8 @@ import { getTimeFromDate } from "../../../utils/dateFormat";
 import MessageOptions from "../../dropdown/messageOptions";
 import { MESSAGE_TYPES } from "../../../redux/types/message.type";
 import CenterSkeletonLoading from "../../skeleton/center.skeleton";
+import { FaQuoteLeft } from "react-icons/fa6";
+import { LuDot } from "react-icons/lu";
 
 const Message = () => {
   const auth = useSelector((state) => state.auth);
@@ -36,6 +39,8 @@ const Message = () => {
 
   const [text, setText] = useState("");
   const [media, setMedia] = useState([]);
+  const [onEdit, setOnEdit] = useState(null);
+  const [updateText, setUpdateText] = useState('')
 
   const [loadMessage, setLoadMessage] = useState(false);
 
@@ -229,6 +234,12 @@ const Message = () => {
     }
   },[message.scrollToBottom, id, dispatch])
 
+  const handleUpdateMessage = async () => {
+    await dispatch(updateMessage({ auth, conversationId: parseInt(id), messageId: onEdit, updateText }))
+    setOnEdit(false)
+    setUpdateText('')
+  }
+
   if (!id) return <MessageScreen />;
   return (
     <div className="w-full px-5 flex flex-col justify-between">
@@ -255,7 +266,7 @@ const Message = () => {
                   <div className='flex flex-col text-right text-sm'> 
                     <span style={{ color: '#65676b'}}>{msg.senderId.fullname}</span>
                     <div className="message_context flex items-center justify-end">
-                      <MessageOptions message={msg} conversationId={Number(id)}/>
+                      <MessageOptions message={msg} conversationId={Number(id)} setOnEdit={setOnEdit} setUpdateText={setUpdateText}/>
                       {!msg.text && msg.attachments && msg.attachments.length > 0 && (
                         <div className="max-w-lg inline-block images_message_container flex flex-col text-right">
                           {msg.attachments.map((att) => (
@@ -280,13 +291,18 @@ const Message = () => {
                       )}
                     </div>
 
-                    {msg.createdAt && (
-                      <div className="message_time_send w-fit self-end text-left mt-1 gray-text">
-                        {
-                          getTimeFromDate(new Date(msg.createdAt))
-                        }
+                    {
+                      msg.isUpdated ?
+                      <div className="flex items-center message_time_send w-fit self-end text-left mt-1 gray-text">
+                        <p className="italic">edited</p>
+                        <LuDot />
+                        <p>{getTimeFromDate(new Date(msg.createdAt))}</p>
                       </div>
-                    )}
+                      :
+                      <div className="message_time_send w-fit self-end text-left mt-1 gray-text">
+                        <p>{getTimeFromDate(new Date(msg.createdAt))}</p>
+                      </div>
+                    }
 
                     {
                       lastMsg?.id === msg.id && lastMsg?.usersRead?.length > 0 && 
@@ -346,13 +362,18 @@ const Message = () => {
                       </div>
                     )}
 
-                    {msg.createdAt && (
-                      <div className="message_time_send w-fit self-start text-left mt-1 gray-text">
-                        {
-                          getTimeFromDate(new Date(msg.createdAt))
-                        }
+                    {
+                      msg.isUpdated ?
+                      <div className="flex items-center message_time_send w-fit self-start text-left mt-1 gray-text">
+                        <p className="italic">edited</p>
+                        <LuDot />
+                        <p>{getTimeFromDate(new Date(msg.createdAt))}</p>
                       </div>
-                    )}
+                      :
+                      <div className="message_time_send w-fit self-start text-left mt-1 gray-text">
+                        <p>{getTimeFromDate(new Date(msg.createdAt))}</p>
+                      </div>
+                    }
 
                     {
                       lastMsg?.id === msg.id && lastMsg?.usersRead?.length > 0 &&
@@ -381,7 +402,9 @@ const Message = () => {
             </div>
           )}
         </div>
-
+        
+        {
+          !onEdit ?
         <form className="chat_form flex py-5 relative" onSubmit={handleSubmit}>
           <div
             className="show_media flex flex-col mt-5"
@@ -398,6 +421,8 @@ const Message = () => {
               </div>
             ))}
           </div>
+         
+     
           <div className="w-full relative">
             <input
               className="w-full bg-gray-100 py-5 px-12 rounded-2xl"
@@ -406,6 +431,7 @@ const Message = () => {
               value={text}
               onChange={(e) => setText(e.target.value)}
             />
+          
             <div className="file_upload cursor-pointer">
               <GrAttachment
                 style={{ fontSize: "22px", marginRight: "10px" }}
@@ -418,10 +444,33 @@ const Message = () => {
                 accept="image/*"
                 onChange={handleChangeMedia}
               />
-            </div>
+            </div> 
           </div>
           <button type="submit" className="send_btn flex items-center justify-center rounded-2xl ml-1.5"><RiSendPlaneFill /></button>
         </form>
+        :
+        <div className="w-full relative">
+          <div
+            className="message__on_edit"
+            >
+            <div>
+              <p><FaQuoteLeft /> {updateText}</p>
+            </div>
+          </div>
+          <div>
+            <input
+              className="w-full bg-gray-100 py-5 px-12 rounded-2xl"
+              type="text"
+              placeholder="write new update messages..."
+              value={updateText === null ? '' : updateText}
+              onChange={(e) => setUpdateText(e.target.value)}
+            />
+          </div>
+          <div className="edit_message_options">
+            <p>press escape to <span onClick={() => { setOnEdit(false); setUpdateText('') }}>cancel</span> . enter to <span onClick={handleUpdateMessage}>save</span></p>
+          </div>
+        </div>
+        }
         </>
       )}
 
