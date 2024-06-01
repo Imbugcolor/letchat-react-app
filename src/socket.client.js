@@ -33,6 +33,16 @@ const SocketClient = () => {
   }, [socket, dispatch]);
 
   useEffect(() => {
+    socket.on("updateMessage", (message) => {
+      console.log(message.conversation.id)
+      dispatch({ type: MESSAGE_TYPES.EDIT_MESSAGE, payload: { conversationId: message.conversation.id, messageId: message.id, updatedMessage: message } });
+    })
+  
+  return () => socket.off("updateMessage");
+  
+  }, [socket, dispatch]);
+
+  useEffect(() => {
 
     socket.on("readMessage", (message) => {
       dispatch({

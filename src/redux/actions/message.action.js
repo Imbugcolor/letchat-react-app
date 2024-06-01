@@ -67,13 +67,13 @@ export const createMessage = ({ auth, conversationId, text = null, photos = [] }
         const formData = new FormData()
 
         photos.map(photo => formData.append("files", photo));
-        formData.append('context', JSON.stringify(text))
+        formData.append('text', JSON.stringify(text))
         let createMessage;
         if (photos && photos.length > 0) {
             const res = await postFormDataAPI(`messages/${conversationId}`, formData, auth.token, dispatch);
             createMessage = res.data
         } else {
-            const res = await postDataAPI(`messages/${conversationId}`, { context: text }, auth.token, dispatch);
+            const res = await postDataAPI(`messages/${conversationId}`, { text }, auth.token, dispatch);
             createMessage = res.data
         }
         const { conversation, ...message } = createMessage
@@ -185,6 +185,17 @@ export const removeUserFromConversation = ({ auth, conversationId, userId }) => 
         await deleteDataAPI(`conversations/${conversationId}/user/${userId}`, auth.token, dispatch);
 
         dispatch({ type: MESSAGE_TYPES.REMOVE_USER_FROM_CONVERSATION, payload: { id: conversationId, userId }})
+    } catch (error) {
+        console.log(error);
+        dispatch({type: GLOBALTYPES.ALERT, payload: {error: error.response.data.message}})
+    }
+}
+
+export const updateMessage = ({ auth, conversationId, messageId, updateText }) => async(dispatch) => {
+    try {
+        const updatedMessage = await patchDataAPI(`messages/${messageId}`, { text: updateText }, auth.token, dispatch)
+
+        dispatch({ type: MESSAGE_TYPES.EDIT_MESSAGE, payload: { conversationId, messageId, updatedMessage: updatedMessage.data }})
     } catch (error) {
         console.log(error);
         dispatch({type: GLOBALTYPES.ALERT, payload: {error: error.response.data.message}})

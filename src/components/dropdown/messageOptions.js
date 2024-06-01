@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteMessage } from "../../redux/actions/message.action";
 
-const MessageOptions = ({ message, conversationId }) => {
+const MessageOptions = ({ message, conversationId, setOnEdit, setUpdateText }) => {
   const auth = useSelector(state => state.auth);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -11,6 +11,11 @@ const MessageOptions = ({ message, conversationId }) => {
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
+
+  const handleEditMessage = () => {
+    setOnEdit(message.id)
+    setUpdateText(message.text)
+  }
 
   const handleDeleteMessage = () => {
     dispatch(deleteMessage({ auth, conversationId, messageId: message.id }))
@@ -52,6 +57,7 @@ const MessageOptions = ({ message, conversationId }) => {
         >
           <span
             className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700"
+            onClick={handleEditMessage}
           >
             Edit
           </span>

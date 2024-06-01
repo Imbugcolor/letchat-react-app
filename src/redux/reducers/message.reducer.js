@@ -143,6 +143,35 @@ const messageReducer = (state = initialState, action) => {
           ...state,
           conversations: state.conversations.filter((cv) => cv.id !== action.payload.id),
         }
+    case MESSAGE_TYPES.EDIT_MESSAGE:
+      return {
+        ...state,
+        conversations: state.conversations.map((cv) => {
+          const newCv = cv.id === action.payload.conversationId && cv.lastMessage.id === action.payload.messageId ?
+             { 
+              ...cv, 
+              lastMessage: { 
+                ...cv.lastMessage, 
+                text: action.payload.updatedMessage.text, 
+                isUpdated: action.payload.updatedMessage.isUpdated, 
+                updatedAt: action.payload.updatedMessage.updatedAt
+              } 
+            } : cv;
+          return newCv;
+        }),
+        data: state.data.map((dt) => {
+          const newData =
+            parseInt(dt.id) === action.payload.conversationId
+              ? {
+                  ...dt,
+                  data: dt.data.map(item =>
+                    item.id === action.payload.messageId ? action.payload.updatedMessage : item
+                  )
+                }
+              : dt;
+          return newData;
+        }),
+      };
     default:
       return state;
   }

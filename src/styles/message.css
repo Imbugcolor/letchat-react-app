@@ -127,6 +127,17 @@
     color: #fff;
 }
 
+.message__on_edit {
+    position: absolute;
+    top: -52px;
+    width: 100%;
+    background: #f3f4f6;
+    border-radius: 10px;
+    padding: 5px;
+    color: #696767;
+    font-style: italic;
+}
+
 
 /* Right Side Message */
 .icon_option {
@@ -141,3 +152,15 @@
 .add-member-button svg{
     background-color: #f4f4f4;
 }
+
+.edit_message_options p,
+.edit_message_options span{
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.edit_message_options span {
+    color: #0e4d80;
+    cursor: pointer;
+}
+
